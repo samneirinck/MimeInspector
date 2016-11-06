@@ -48,7 +48,7 @@ namespace MimeInspector.Test.Utilities
         }
 
         [Fact]
-        public async Task ParseMessageAsync_ValidMimeStreamButWithCanceledCancellationToken_OperationCanceledException()
+        public async Task ParseMessageAsync_ValidMimeStreamButWithCanceledCancellationToken_TaskCanceledException()
         {
             // Arrange
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -56,7 +56,7 @@ namespace MimeInspector.Test.Utilities
             using (var inputStream = new MemoryStream(Resources.As4Message))
             {
                 // Act & Assert
-                await Assert.ThrowsAsync<OperationCanceledException>(() => AsyncMimeParser.ParseMessageAsync(inputStream, cancellationTokenSource.Token));
+                await Assert.ThrowsAsync<TaskCanceledException>(() => AsyncMimeParser.ParseMessageAsync(inputStream, cancellationTokenSource.Token));
             }
         }
 
