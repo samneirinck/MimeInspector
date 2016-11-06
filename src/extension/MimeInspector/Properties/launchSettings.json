@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Fiddler": {
+      "executablePath": "C:\\Program Files (x86)\\Fiddler2\\Fiddler.exe",
+      "commandLineArgs": "-viewer \"C:\\Users\\SamNeirinck\\Downloads\\sample.saz\""
+    }
+  }
+}
