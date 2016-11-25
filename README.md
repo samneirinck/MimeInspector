@@ -12,8 +12,9 @@ A [Fiddler](http://www.telerik.com/fiddler) inspector to easily inspect MIME mes
 ![Screenshot](img/screenshot.png "A request view")
 
 # Installation
-1. Extract the zip to `%USERPROFILE%\Documents\Fiddler2\Inspectors` (Create folders as necessary)
+1. Extract the zip from the [latest release](https://github.com/samneirinck/MimeInspector/releases) to `%USERPROFILE%\Documents\Fiddler2\Inspectors` (Create folders as necessary)
 2. Restart Fiddler
+3. Enjoy
 
 # License
 This work is licensed under the MIT License.
