@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace MimeInspector.Compression
 {
@@ -17,10 +18,29 @@ namespace MimeInspector.Compression
 
             try
             {
-
                 using (var gzip = new GZipStream(inputStream, CompressionMode.Decompress))
                 {
                     gzip.CopyTo(memoryStream);
+                    memoryStream.Position = 0;
+                    return memoryStream;
+                }
+            }
+            catch (Exception)
+            {
+                memoryStream.Dispose();
+                throw;
+            }
+        }
+
+        public static async Task<Stream> DecompressAsync(Stream inputStream)
+        {
+            var memoryStream = new MemoryStream();
+
+            try
+            {
+                using (var gzip = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    await gzip.CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
                     return memoryStream;
                 }
@@ -36,11 +56,12 @@ namespace MimeInspector.Compression
         /// Compresses the specified original stream.
         /// </summary>
         /// <param name="inputStream">The original stream.</param>
-        /// <param name="outputStream"></param>
+        /// <param name="outputStream">The stream containing the zipped contents.</param>
         /// <returns></returns>
-        public static void Compress(Stream inputStream, Stream outputStream)
+        public static Stream Compress(Stream inputStream)
         {
-            using (inputStream)
+            var outputStream = new MemoryStream();
+
             using (var gzip = new GZipStream(outputStream, CompressionMode.Compress, true))
             {
                 inputStream.CopyTo(gzip);
@@ -48,6 +69,21 @@ namespace MimeInspector.Compression
 
             outputStream.Position = 0;
 
+            return outputStream;
+        }
+
+        public static async Task<Stream> CompressAsync(Stream inputStream)
+        {
+            var outputStream = new MemoryStream();
+
+            using (var gzip = new GZipStream(outputStream, CompressionMode.Compress, true))
+            {
+                await inputStream.CopyToAsync(gzip);
+            }
+
+            outputStream.Position = 0;
+
+            return outputStream;
         }
     }
 }
