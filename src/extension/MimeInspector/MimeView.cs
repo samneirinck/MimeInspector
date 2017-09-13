@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Fiddler;
 using MimeInspector.Compression;
@@ -32,65 +31,84 @@ namespace MimeInspector
             _headersRequest.AddToTab(headersTab);
         }
 
-        public void LoadBody(byte[] messageBody, HTTPHeaders headers)
+        public void LoadMimeMessage(MimeMessage mimeMessage)
         {
-            LoadBodyAsync(messageBody).Start();
+            _mimeMessage = mimeMessage;
+            FillTreeView();
         }
 
-        private async Task LoadBodyAsync(byte[] messageBody)
+        public void Clear()
         {
-            using (MemoryStream memoryStream = new MemoryStream(messageBody))
-            {
-                _mimeMessage = await AsyncMimeParser.ParseMessageAsync(memoryStream);
+            _mimeMessage = null;
+            _rawRequest.body = new byte[] { };
+            _xmlRequest.body = new byte[] { };
+            _headersRequest.body = new byte[] { };
 
-                FillTreeView();
-            }
+            messageTree.Nodes.Clear();
         }
-
+        
         private void FillTreeView()
         {
             var iter = new MimeIterator(_mimeMessage);
-            messageTree.Nodes.Clear();
 
-            while (iter.MoveNext())
+            messageTree.BeginUpdate();
+
+            try
             {
-                TreeNode createdNode = null;
-                if (iter.Parent == null)
-                {
-                    createdNode = messageTree.Nodes.Add(iter.Current.ContentId ?? "body");
-                }
-                else
-                {
-                    createdNode = messageTree.Nodes.Cast<TreeNode>().First(x => x.Tag == iter.Parent).Nodes.Add(iter.Current.ContentId ?? "part");
-                }
+                messageTree.Nodes.Clear();
 
-                createdNode.Tag = iter.Current;
-                createdNode.ContextMenu = new ContextMenu();
-                var menuItem = createdNode.ContextMenu.MenuItems.Add("Save to file...");
-                menuItem.Tag = iter.Current;
-                menuItem.Click += (s, e) =>
+                while (iter.MoveNext())
                 {
-                    var dialog = new SaveFileDialog();
-                    if (dialog.ShowDialog() == DialogResult.OK)
+                    TreeNode createdNode = null;
+
+                    if (iter.Parent == null)
                     {
-                        using (FileStream fs = new FileStream(dialog.FileName, FileMode.OpenOrCreate))
-                        {
-                            MimePart part = ((MenuItem)s).Tag as MimePart;
-                            if (part != null)
-                            {
-                                part.ContentObject.WriteTo(fs);
-                            }
-
-                            fs.Flush();
-                        }
-                        if (MessageBox.Show("Open now?", "Open attachment", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            Process.Start(dialog.FileName);
-                        }
-
+                        createdNode = messageTree.Nodes.Add(iter.Current.ContentId ?? "body");
                     }
-                };
+                    else
+                    {
+                        createdNode = messageTree.Nodes.Cast<TreeNode>().First(x => x.Tag == iter.Parent).Nodes.Add(iter.Current.ContentId ?? "part");
+                    }
 
+                    createdNode.Tag = iter.Current;
+                    createdNode.ContextMenu = new ContextMenu();
+                    var menuItem = createdNode.ContextMenu.MenuItems.Add("Save to file...");
+                    menuItem.Tag = iter.Current;
+                    menuItem.Click += (s, e) =>
+                    {
+                        var dialog = new SaveFileDialog();
+                        if (dialog.ShowDialog() == DialogResult.OK)
+                        {
+                            using (FileStream fs = new FileStream(dialog.FileName, FileMode.OpenOrCreate))
+                            {
+                                if( ((MenuItem)s).Tag is MimePart part )                                
+                                {
+                                    part.ContentObject.WriteTo(fs);
+                                }
+
+                                fs.Flush();
+                            }
+                            if (MessageBox.Show("Open now?", "Open attachment", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                Process.Start(dialog.FileName);
+                            }
+                        }
+                    };
+                }
+
+                if (messageTree.Nodes.Count > 0)
+                {
+                    var firstNode = messageTree.Nodes[0];
+                    firstNode.Expand();
+
+                    messageTree.SelectedNode = firstNode;
+                    firstNode.EnsureVisible();
+                }
+
+            }
+            finally
+            {
+                messageTree.EndUpdate();
             }
         }
 
@@ -106,18 +124,22 @@ namespace MimeInspector
             {
                 body = Encoding.UTF8.GetBytes(multipart.Preamble);
             }
+
             if (part != null)
             {
+
                 Stream stream = part.ContentObject.Open();
+
                 if (string.Equals(part.ContentType?.MimeType, "application/gzip"))
                 {
                     stream = GZipCompressor.Decompress(stream);
                 }
-                body = ReadFully(stream);
+                body = StreamUtilities.ReadFully(stream);
 
             }
 
             var httpHeaders = new HTTPRequestHeaders();
+
             if (entity != null)
             {
                 foreach (var header in entity.Headers)
@@ -131,18 +153,6 @@ namespace MimeInspector
             _xmlRequest.body = body;
         }
 
-        public static byte[] ReadFully(Stream input)
-        {
-            byte[] buffer = new byte[16 * 1024];
-            using (MemoryStream ms = new MemoryStream())
-            {
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    ms.Write(buffer, 0, read);
-                }
-                return ms.ToArray();
-            }
-        }
+       
     }
 }

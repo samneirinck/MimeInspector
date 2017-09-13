@@ -1,13 +1,12 @@
 ﻿{
   "dependencies": {
-    "MimeKit": "1.2.20.2"
-
+    "MimeKit": "1.18.1"
   },
-
   "frameworks": {
-    "net461": {
-    }
+    "net461": {}
   },
-  "supports": { },
-  "runtimes": {"win": {}}
+  "supports": {},
+  "runtimes": {
+    "win": {}
+  }
 }
