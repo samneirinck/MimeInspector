@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Fiddler;
+using MimeInspector.Utilities;
 
 namespace MimeInspector
 {
     public class MimeRequestViewer : Inspector2, IRequestInspector2
     {
         private MimeView _mimeView;
-        private HTTPRequestHeaders _headers;
 
         public bool bDirty => false;
 
@@ -22,14 +24,25 @@ namespace MimeInspector
             {
                 if (value != null && value.Length > 0)
                 {
-                    try
+                    var mimeMessage = AsyncMimeParser.ParseMessage(value, headers, CancellationToken.None);
+
+                    if (mimeMessage != null)
                     {
-                        _mimeView.LoadBody(value, _headers);
+                        _mimeView.LoadMimeMessage(mimeMessage);                        
                     }
-                    catch (Exception)
+                    else
                     {
                         Clear();
                     }
+
+                    ////try
+                    ////{
+                    ////    _mimeView.LoadBody(value, _headers);
+                    ////}
+                    ////catch (Exception)
+                    ////{
+                    ////    Clear();
+                    ////}
                 }
                 else
                 {
@@ -44,34 +57,21 @@ namespace MimeInspector
             {
                 return true;
             }
-
             set
             {
             }
         }
 
-        public HTTPRequestHeaders headers
-        {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                _headers = value;
-            }
-        }
+        public HTTPRequestHeaders headers { get; set; }
 
         public MimeRequestViewer()
         {
             _mimeView = new MimeView();
         }
 
-
         public void Clear()
         {
-            // TODO: Clear view
+            _mimeView.Clear();            
         }
 
         public override void AddToTab(TabPage o)
