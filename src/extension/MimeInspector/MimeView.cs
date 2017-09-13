@@ -83,8 +83,7 @@ namespace MimeInspector
                         {
                             using (FileStream fs = new FileStream(dialog.FileName, FileMode.OpenOrCreate))
                             {
-                                MimePart part = ((MenuItem)s).Tag as MimePart;
-                                if (part != null)
+                                if( ((MenuItem)s).Tag is MimePart part )                                
                                 {
                                     part.ContentObject.WriteTo(fs);
                                 }
