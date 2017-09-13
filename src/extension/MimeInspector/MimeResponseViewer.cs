@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading;
 using System.Windows.Forms;
 using Fiddler;
+using MimeInspector.Utilities;
 
 namespace MimeInspector
 {
@@ -22,14 +24,25 @@ namespace MimeInspector
             {
                 if (value != null && value.Length > 0)
                 {
-                    try
+                    var mimeMessage = AsyncMimeParser.ParseMessage(value, headers, CancellationToken.None);
+
+                    if (mimeMessage != null)
                     {
-                        _mimeView.LoadBody(value, _headers);
+                        _mimeView.LoadMimeMessage(mimeMessage);
                     }
-                    catch (Exception)
+                    else
                     {
                         Clear();
                     }
+
+                    ////try
+                    ////{
+                    ////    _mimeView.LoadBody(value, _headers);
+                    ////}
+                    ////catch (Exception)
+                    ////{
+                    ////    Clear();
+                    ////}
                 }
                 else
                 {
