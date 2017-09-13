@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Windows.Forms;
 using Fiddler;
 using MimeInspector.Utilities;
@@ -8,8 +7,7 @@ namespace MimeInspector
 {
     public class MimeResponseViewer : Inspector2, IResponseInspector2
     {
-        private MimeView _mimeView;
-        private HTTPResponseHeaders _headers;
+        private readonly MimeView _mimeView;
 
         public bool bDirty => false;
 
@@ -34,15 +32,6 @@ namespace MimeInspector
                     {
                         Clear();
                     }
-
-                    ////try
-                    ////{
-                    ////    _mimeView.LoadBody(value, _headers);
-                    ////}
-                    ////catch (Exception)
-                    ////{
-                    ////    Clear();
-                    ////}
                 }
                 else
                 {
@@ -63,18 +52,7 @@ namespace MimeInspector
             }
         }
 
-        public HTTPResponseHeaders headers
-        {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                _headers = value;
-            }
-        }
+        public HTTPResponseHeaders headers { get; set; }
 
         public MimeResponseViewer()
         {
@@ -83,7 +61,6 @@ namespace MimeInspector
 
         public override void AddToTab(TabPage o)
         {
-            _mimeView = new MimeView();
             o.Text = "MIME";
             o.Controls.Add(_mimeView);
             _mimeView.Dock = DockStyle.Fill;
@@ -91,6 +68,7 @@ namespace MimeInspector
 
         public void Clear()
         {
+            _mimeView.Clear();
         }
 
         public override int GetOrder()
