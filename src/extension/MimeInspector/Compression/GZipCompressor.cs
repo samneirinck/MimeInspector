@@ -56,8 +56,7 @@ namespace MimeInspector.Compression
         /// Compresses the specified original stream.
         /// </summary>
         /// <param name="inputStream">The original stream.</param>
-        /// <param name="outputStream">The stream containing the zipped contents.</param>
-        /// <returns></returns>
+        /// <returns>A new Stream containing the compressed contents.</returns>
         public static Stream Compress(Stream inputStream)
         {
             var outputStream = new MemoryStream();
