@@ -1,9 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Fiddler;
 using MimeInspector.Compression;
@@ -94,10 +92,19 @@ namespace MimeInspector
                             {
                                 Process.Start(dialog.FileName);
                             }
-
                         }
                     };
                 }
+
+                if (messageTree.Nodes.Count > 0)
+                {
+                    var firstNode = messageTree.Nodes[0];
+                    firstNode.Expand();
+
+                    messageTree.SelectedNode = firstNode;
+                    firstNode.EnsureVisible();
+                }
+
             }
             finally
             {
