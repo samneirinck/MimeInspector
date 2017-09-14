@@ -22,7 +22,7 @@ namespace MimeInspector
             {
                 if (value != null && value.Length > 0)
                 {
-                    var mimeMessage = AsyncMimeParser.ParseMessage(value, headers, CancellationToken.None);
+                    var mimeMessage = MimeParser.ParseMessage(value, headers, CancellationToken.None);
 
                     if (mimeMessage != null)
                     {

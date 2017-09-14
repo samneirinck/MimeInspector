@@ -1,9 +1,4 @@
-﻿using Fiddler;
-using MimeKit.IO;
-using System;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 
 namespace MimeInspector.Utilities
 {

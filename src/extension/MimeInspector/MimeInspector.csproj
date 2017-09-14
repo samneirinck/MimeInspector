@@ -64,7 +64,7 @@
       <DependentUpon>MimeView.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\AsyncMimeParser.cs" />
+    <Compile Include="Utilities\MimeParser.cs" />
     <Compile Include="Utilities\StreamUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
