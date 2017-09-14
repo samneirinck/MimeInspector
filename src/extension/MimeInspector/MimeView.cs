@@ -72,7 +72,7 @@ namespace MimeInspector
                     {
                         createdNode = rootNode.Nodes.Add(iter.Current.ContentId ?? "part");
                     }
-                    
+
                     createdNode.Tag = iter.Current;
                     createdNode.ContextMenu = new ContextMenu();
 
@@ -116,13 +116,13 @@ namespace MimeInspector
             }
         }
 
-        private void OnNodeSelected(object sender, TreeViewEventArgs e)
+        private async void OnNodeSelected(object sender, TreeViewEventArgs e)
         {
             var entity = e.Node.Tag as MimeEntity;
             var multipart = entity as Multipart;
             var part = entity as MimePart;
 
-            byte[] body = null;
+            byte[] body = new byte[] { };
 
             if (multipart != null)
             {
@@ -133,12 +133,12 @@ namespace MimeInspector
             {
                 Stream stream = part.ContentObject.Open();
 
-                if (string.Equals(part.ContentType?.MimeType, "application/gzip"))
+                if (string.Equals(part.ContentType?.MimeType, "application/gzip", System.StringComparison.OrdinalIgnoreCase))
                 {
                     stream = GZipCompressor.Decompress(stream);
                 }
 
-                body = StreamUtilities.ReadFully(stream);
+                body = await StreamUtilities.ReadFullyAsync(stream);
             }
 
             var httpHeaders = new HTTPRequestHeaders();
