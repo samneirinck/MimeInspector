@@ -46,7 +46,7 @@ namespace MimeInspector
 
             messageTree.Nodes.Clear();
         }
-        
+
         private void FillTreeView()
         {
             var iter = new MimeIterator(_mimeMessage);
@@ -57,23 +57,28 @@ namespace MimeInspector
             {
                 messageTree.Nodes.Clear();
 
+                TreeNode rootNode = null;
+
                 while (iter.MoveNext())
                 {
                     TreeNode createdNode = null;
 
-                    if (iter.Parent == null)
+                    if (rootNode == null)
                     {
-                        createdNode = messageTree.Nodes.Add(iter.Current.ContentId ?? "body");
+                        rootNode = messageTree.Nodes.Add(iter.Current.ContentId ?? "body");
+                        createdNode = rootNode;
                     }
                     else
                     {
-                        createdNode = messageTree.Nodes.Cast<TreeNode>().First(x => x.Tag == iter.Parent).Nodes.Add(iter.Current.ContentId ?? "part");
+                        createdNode = rootNode.Nodes.Add(iter.Current.ContentId ?? "part");
                     }
-
+                    
                     createdNode.Tag = iter.Current;
                     createdNode.ContextMenu = new ContextMenu();
+
                     var menuItem = createdNode.ContextMenu.MenuItems.Add("Save to file...");
                     menuItem.Tag = iter.Current;
+
                     menuItem.Click += (s, e) =>
                     {
                         var dialog = new SaveFileDialog();
@@ -81,7 +86,7 @@ namespace MimeInspector
                         {
                             using (FileStream fs = new FileStream(dialog.FileName, FileMode.OpenOrCreate))
                             {
-                                if( ((MenuItem)s).Tag is MimePart part )                                
+                                if (((MenuItem)s).Tag is MimePart part)
                                 {
                                     part.ContentObject.WriteTo(fs);
                                 }
@@ -96,13 +101,12 @@ namespace MimeInspector
                     };
                 }
 
-                if (messageTree.Nodes.Count > 0)
+                if (rootNode != null)
                 {
-                    var firstNode = messageTree.Nodes[0];
-                    firstNode.Expand();
+                    rootNode.Expand();
 
-                    messageTree.SelectedNode = firstNode;
-                    firstNode.EnsureVisible();
+                    messageTree.SelectedNode = rootNode;
+                    rootNode.EnsureVisible();
                 }
 
             }
@@ -127,15 +131,14 @@ namespace MimeInspector
 
             if (part != null)
             {
-
                 Stream stream = part.ContentObject.Open();
 
                 if (string.Equals(part.ContentType?.MimeType, "application/gzip"))
                 {
                     stream = GZipCompressor.Decompress(stream);
                 }
-                body = StreamUtilities.ReadFully(stream);
 
+                body = StreamUtilities.ReadFully(stream);
             }
 
             var httpHeaders = new HTTPRequestHeaders();
@@ -152,7 +155,5 @@ namespace MimeInspector
             _rawRequest.body = body;
             _xmlRequest.body = body;
         }
-
-       
     }
 }
