@@ -138,7 +138,7 @@ namespace MimeInspector
 
                 if (string.Equals(part.ContentType?.MimeType, "application/gzip", System.StringComparison.OrdinalIgnoreCase))
                 {
-                    stream = GZipCompressor.Decompress(stream);
+                    stream = await GZipCompressor.DecompressAsync(stream);
                 }
 
                 body = await StreamUtilities.ReadFullyAsync(stream);
