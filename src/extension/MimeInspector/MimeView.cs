@@ -129,7 +129,7 @@ namespace MimeInspector
                 body = Encoding.UTF8.GetBytes(multipart.Preamble);
             }
 
-            if (part != null)
+            if (part?.ContentObject != null)
             {
                 Stream stream = part.ContentObject.Open();
 
