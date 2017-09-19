@@ -88,7 +88,10 @@ namespace MimeInspector
                             {
                                 if (((MenuItem)s).Tag is MimePart part)
                                 {
-                                    part.ContentObject.WriteTo(fs);
+                                    if (part.ContentObject != null)
+                                    {
+                                        part.ContentObject.WriteTo(fs);
+                                    }
                                 }
 
                                 fs.Flush();
@@ -129,7 +132,7 @@ namespace MimeInspector
                 body = Encoding.UTF8.GetBytes(multipart.Preamble);
             }
 
-            if (part?.ContentObject != null)
+            if (part != null && part.ContentObject != null)
             {
                 Stream stream = part.ContentObject.Open();
 
