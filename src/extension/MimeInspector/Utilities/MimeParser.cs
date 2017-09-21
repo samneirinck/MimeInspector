@@ -50,7 +50,7 @@ namespace MimeInspector.Utilities
                 return null;
             }
 
-            string headerString = String.Join("\r\n", headerArray.Select(h => $"{h.Name}:{h.Value}"));
+            string headerString = String.Join("\r\n", headerArray.Select(h => $"{h.Name}: {h.Value}"));
 
             try
             {
