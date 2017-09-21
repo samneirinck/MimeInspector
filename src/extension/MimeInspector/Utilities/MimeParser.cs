@@ -10,7 +10,7 @@ using MimeKit.IO;
 
 namespace MimeInspector.Utilities
 {
-    public static class AsyncMimeParser
+    public static class MimeParser
     {
         public static Task<MimeMessage> ParseMessageAsync(byte[] message, HTTPHeaders headers, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -43,17 +43,44 @@ namespace MimeInspector.Utilities
                 return null;
             }
 
-            string headerString = String.Join("\r\n", headers.ToArray().Select(h => $"{h.Name}:{h.Value}"));
+            var headerArray = headers.ToArray();
 
-            using (ChainedStream streamWithHeaders = new ChainedStream())
+            if(IsMimeMessage(headerArray) == false)
             {
-                streamWithHeaders.Add(new MemoryStream(Encoding.UTF8.GetBytes(headerString)), false);
-                streamWithHeaders.Add(inputStream, false);
-
-                var parser = new MimeParser(streamWithHeaders);
-
-                return parser.ParseMessage(cancellationToken);
+                return null;
             }
+
+            string headerString = String.Join("\r\n", headerArray.Select(h => $"{h.Name}: {h.Value}"));
+
+            try
+            {
+                using (ChainedStream streamWithHeaders = new ChainedStream())
+                {
+                    streamWithHeaders.Add(new MemoryStream(Encoding.UTF8.GetBytes(headerString)), false);
+                    streamWithHeaders.Add(inputStream, false);
+
+                    var parser = new MimeKit.MimeParser(streamWithHeaders);
+
+                    return parser.ParseMessage(cancellationToken);
+                }
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+        }
+
+        private static bool IsMimeMessage(HTTPHeaderItem[] headers)
+        {
+            var contentType = headers.FirstOrDefault(h => StringComparer.OrdinalIgnoreCase.Equals(h.Name, "content-type"));
+
+            if (contentType != null &&
+                contentType.Value.IndexOf("multipart/related", StringComparison.OrdinalIgnoreCase) > -1 )
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
